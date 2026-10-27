@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4.svg)](https://www.php.net/)
 
-Modern, hafif ve AI (OpenAI Codex) destekli açık kaynak **CRM Destek & Ticket Sistemi**.
+Modern, hafif ve modüler açık kaynak **CRM Destek & Bilet (Ticket) Yönetim Sistemi**.
 
-Bu proje, açık kaynak topluluklarının bakım yükünü azaltmak amacıyla **OpenAI Codex** destekli otomatik Pull Request (PR) inceleme, kod güvenlik taraması ve ticket önceliklendirme iş akışları ile güçlendirilmiştir.
+Bu proje, müşteri taleplerini, destek biletlerini ve teknik arıza bildirimlerini yönetmek için geliştirilmiş, RESTful API mimarisine sahip açık kaynaklı bir çözümdür.
 
 ---
 
@@ -14,7 +14,7 @@ Bu proje, açık kaynak topluluklarının bakım yükünü azaltmak amacıyla **
 
 - **RESTful Ticket API:** Kolay entegre edilebilir JSON tabanlı bilet oluşturma, sorgulama ve durum güncelleme.
 - **Veritabanı Esnekliği:** Geliştirme için SQLite, üretim için MySQL/PostgreSQL uyumlu PDO mimarisi.
-- **AI / Codex PR Review Entegrasyonu:** Gelen PR'ları güvenlik (SQLi, XSS) ve PSR-12 standartları açısından otomatik denetleyen CLI & GitHub Actions mekanizması.
+- **Modüler & Temiz Mimari:** PSR-12 ve PSR-4 standartlarına tam uyumlu nesne yönelimli PHP tasarımı.
 - **Otomatik CI/CD:** GitHub Actions testleri ve Dependabot bağımlılık güncellemeleri.
 
 ---
@@ -58,19 +58,6 @@ curl -X POST http://localhost:8000/tickets \
 ```bash
 curl http://localhost:8000/tickets
 ```
-
----
-
-## 🤖 Codex AI İnceleme Aracı
-
-Yerel geliştirme sırasında kod değişikliklerinizi kontrol etmek için:
-
-```bash
-# Git değişikliklerinizi inceleyin
-php codex.php review
-```
-
-GitHub Actions üzerinde her yeni Pull Request açıldığında bu inceleme otomatik olarak çalışır.
 
 ---
 

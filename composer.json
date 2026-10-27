@@ -1,6 +1,6 @@
 {
     "name": "mserhangulhan/crm-ticket-system",
-    "description": "Open Source CRM Ticket System with AI-powered PR review and maintenance automation.",
+    "description": "Open Source CRM Ticket and Customer Support Management System in PHP.",
     "type": "project",
     "license": "MIT",
     "authors": [
@@ -26,7 +26,6 @@
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "codex-review": "php codex.php review"
+        "test": "phpunit"
     }
 }

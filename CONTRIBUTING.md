@@ -16,13 +16,8 @@
    ```bash
    composer test
    ```
-5. AI / Codex İncelemesini çalıştırın:
-   ```bash
-   php codex.php review
-   ```
-6. Değişikliklerinizi commit edip GitHub'a push edin ve bir Pull Request (PR) açın.
+5. Değişikliklerinizi commit edip GitHub'a push edin ve bir Pull Request (PR) açın.
 
 ## Pull Request Süreci
-- Her Pull Request otomatik olarak GitHub Actions üzerinden test edilir.
-- OpenAI Codex destekli PR inceleme botu kodunuzu inceler ve olası güvenlik açıklarını bildirir.
-- Kod incelemesi onaylandıktan sonra ana dala (`main`) birleştirilir.
+- Her Pull Request otomatik olarak GitHub Actions CI testlerinden geçer.
+- Kod incelemesi tamamlandıktan sonra ana dala (`main`) birleştirilir.
