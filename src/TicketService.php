@@ -8,10 +8,22 @@ use InvalidArgumentException;
 class TicketService
 {
     private PDO $db;
+    private ?WebhookDispatcher $dispatcher;
 
-    public function __construct(?PDO $db = null)
+    public function __construct(?PDO $db = null, ?WebhookDispatcher $dispatcher = null)
     {
         $this->db = $db ?? Database::getConnection();
+        $this->dispatcher = $dispatcher;
+    }
+
+    public function setDispatcher(WebhookDispatcher $dispatcher): void
+    {
+        $this->dispatcher = $dispatcher;
+    }
+
+    public function getDispatcher(): ?WebhookDispatcher
+    {
+        return $this->dispatcher;
     }
 
     public function createTicket(array $data): array
@@ -39,7 +51,13 @@ class TicketService
         ]);
 
         $id = (int)$this->db->lastInsertId();
-        return $this->getTicket($id);
+        $ticket = $this->getTicket($id);
+
+        if ($this->dispatcher !== null && $ticket !== null) {
+            $this->dispatcher->dispatch('ticket.created', $ticket);
+        }
+
+        return $ticket;
     }
 
     public function getTicket(int $id): ?array
@@ -76,9 +94,21 @@ class TicketService
             WHERE id = :id
         ");
 
-        return $stmt->execute([
+        $result = $stmt->execute([
             ':status' => $status,
             ':id' => $id,
         ]);
+
+        if ($result && $this->dispatcher !== null) {
+            $updatedTicket = $this->getTicket($id);
+            if ($updatedTicket !== null) {
+                $this->dispatcher->dispatch('ticket.status_updated', [
+                    'ticket' => $updatedTicket,
+                    'new_status' => $status,
+                ]);
+            }
+        }
+
+        return $result;
     }
 }
