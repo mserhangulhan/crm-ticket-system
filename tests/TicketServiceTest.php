@@ -53,4 +53,41 @@ class TicketServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->service->createTicket([]);
     }
+
+    public function testInvalidPriorityThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->service->createTicket([
+            'title' => 'Geçersiz Öncelik',
+            'priority' => 'invalid-priority'
+        ]);
+    }
+
+    public function testInvalidStatusUpdateThrowsException(): void
+    {
+        $ticket = $this->service->createTicket(['title' => 'Test']);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->service->updateStatus((int)$ticket['id'], 'invalid_status');
+    }
+
+    public function testGetNonExistentTicketReturnsNull(): void
+    {
+        $ticket = $this->service->getTicket(99999);
+        $this->assertNull($ticket);
+    }
+
+    public function testListTicketsWithFilter(): void
+    {
+        $ticket1 = $this->service->createTicket(['title' => 'Ticket 1']);
+        $ticket2 = $this->service->createTicket(['title' => 'Ticket 2']);
+        $this->service->updateStatus((int)$ticket2['id'], 'closed');
+
+        $openTickets = $this->service->listTickets('open');
+        $this->assertCount(1, $openTickets);
+        $this->assertEquals('Ticket 1', $openTickets[0]['title']);
+
+        $closedTickets = $this->service->listTickets('closed');
+        $this->assertCount(1, $closedTickets);
+        $this->assertEquals('Ticket 2', $closedTickets[0]['title']);
+    }
 }
