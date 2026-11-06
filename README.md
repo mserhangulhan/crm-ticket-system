@@ -16,6 +16,8 @@ Bu proje, müşteri taleplerini, destek biletlerini ve teknik arıza bildirimler
 - **Veritabanı Esnekliği:** Geliştirme için SQLite, üretim için MySQL/PostgreSQL uyumlu PDO mimarisi.
 - **Modüler & Temiz Mimari:** PSR-12 ve PSR-4 standartlarına tam uyumlu nesne yönelimli PHP tasarımı.
 - **Otomatik CI/CD:** GitHub Actions testleri ve Dependabot bağımlılık güncellemeleri.
+- **Webhook Olay Bildirimleri:** `ticket.created` ve `ticket.status_updated` olayları için harici sistem entegrasyonu (HTTP POST / callable).
+- **Bildirim Geçmişi & Takip:** Tüm webhook teslimatlarının kalıcı loglanması, durum izleme (bekliyor/gönderildi/başarısız), deneme sayısı ve hata detayları.
 
 ---
 

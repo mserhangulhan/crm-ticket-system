@@ -2,6 +2,8 @@
 
 namespace Crm\Ticket;
 
+use PDO;
+
 class WebhookDispatcher
 {
     /** @var array<string, array<callable|string>> */
@@ -9,6 +11,18 @@ class WebhookDispatcher
 
     /** @var array<array{event: string, payload: array}> */
     private array $dispatchedEvents = [];
+
+    private ?NotificationLog $notificationLog;
+
+    public function __construct(?NotificationLog $notificationLog = null)
+    {
+        $this->notificationLog = $notificationLog;
+    }
+
+    public function setNotificationLog(NotificationLog $log): void
+    {
+        $this->notificationLog = $log;
+    }
 
     /**
      * Olay dinleyicisi kaydeder (URL veya callable).
@@ -23,6 +37,11 @@ class WebhookDispatcher
      */
     public function dispatch(string $event, array $payload): int
     {
+        $logId = null;
+        if ($this->notificationLog !== null) {
+            $logId = $this->notificationLog->log($event, $payload, 'pending');
+        }
+
         $this->dispatchedEvents[] = [
             'event' => $event,
             'payload' => $payload,
@@ -39,9 +58,18 @@ class WebhookDispatcher
                 $handler($event, $payload);
                 $successCount++;
             } elseif (is_string($handler) && filter_var($handler, FILTER_VALIDATE_URL)) {
-                if ($this->sendHttpRequest($handler, $event, $payload)) {
+                $sent = $this->sendHttpRequest($handler, $event, $payload);
+                if ($sent) {
                     $successCount++;
                 }
+            }
+        }
+
+        if ($this->notificationLog !== null && $logId !== null) {
+            if ($successCount > 0) {
+                $this->notificationLog->markSent($logId);
+            } else {
+                $this->notificationLog->markFailed($logId, 'No listeners or all HTTP deliveries failed');
             }
         }
 

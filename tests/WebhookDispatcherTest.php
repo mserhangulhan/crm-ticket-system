@@ -4,17 +4,20 @@ namespace Crm\Ticket\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Crm\Ticket\WebhookDispatcher;
+use Crm\Ticket\NotificationLog;
 use Crm\Ticket\TicketService;
 use Crm\Ticket\Database;
 
 class WebhookDispatcherTest extends TestCase
 {
     private WebhookDispatcher $dispatcher;
+    private NotificationLog $notificationLog;
 
     protected function setUp(): void
     {
         Database::reset();
-        $this->dispatcher = new WebhookDispatcher();
+        $this->notificationLog = new NotificationLog();
+        $this->dispatcher = new WebhookDispatcher($this->notificationLog);
     }
 
     public function testSubscribeAndDispatchCallable(): void
@@ -76,5 +79,36 @@ class WebhookDispatcherTest extends TestCase
         $count = $this->dispatcher->dispatch('unhandled.event', ['key' => 'val']);
         $this->assertEquals(0, $count);
         $this->assertCount(1, $this->dispatcher->getDispatchedEvents());
+    }
+
+    public function testDispatchLogsToNotificationLog(): void
+    {
+        $this->dispatcher->subscribe('test.logged.event', function () {});
+        $this->dispatcher->dispatch('test.logged.event', ['data' => 'logged']);
+
+        $logs = $this->notificationLog->getLogs('test.logged.event');
+        $this->assertCount(1, $logs);
+        $this->assertEquals('sent', $logs[0]['status']);
+        $this->assertEquals(['data' => 'logged'], $logs[0]['payload']);
+    }
+
+    public function testDispatchWithFailedUrlLogsFailure(): void
+    {
+        $this->dispatcher->subscribe('test.failed.url', 'https://invalid.invalid.url/test');
+        $this->dispatcher->dispatch('test.failed.url', ['data' => 'failed']);
+
+        $logs = $this->notificationLog->getLogs('test.failed.url');
+        $this->assertCount(1, $logs);
+        $this->assertEquals('failed', $logs[0]['status']);
+        $this->assertEquals(1, $logs[0]['attempts']);
+    }
+
+    public function testCallableListenerMarksSent(): void
+    {
+        $this->dispatcher->subscribe('test.callable', function () {});
+        $this->dispatcher->dispatch('test.callable', ['data' => 'callable']);
+
+        $logs = $this->notificationLog->getLogs('test.callable');
+        $this->assertEquals('sent', $logs[0]['status']);
     }
 }
